@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>テーブル列でソートを行う</title>
+</head>
+<body>
+    <div id="app">
+        <h1>{{ message }}</h1>
+        <h2>{{ sort_key }}: {{ sort_asc ? '昇順' : '降順'}}</h2>
+        <table>
+            <thead>
+                <th @click="sortBy('name')" :class="addClass('name')">Name</th>
+                <th @click="sortBy('email')" :class="addClass('email')">Email</th>
+                <th @click="sortBy('website')" :class="addClass('website')">
+                    Website
+                </th>
+            </thead>
+            <tbody>
+                <tr v-for="user in sort_users" :key="user.id">
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.website }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+<style>
+    table {
+        border-collapse: collapse;
+        width: 100%
+    }
+
+    td,
+    th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    th {
+        color: white;
+        background-color: #1E90FF;
+    }
+
+    .asc::after {
+        content: "↓";
+    }
+
+    .desc::after {
+        content: "↑";
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            message: 'Sort Column In Table',
+            users: [],
+            sort_key: "",
+            sort_asc: true,
+        },
+        methods: {
+            sortBy(key) {
+                this.sort_key === key
+                    ? (this.sort_asc = !this.sort_asc)
+                    : (this.sort_asc = true);
+                this.sort_key = key;
+            },
+            addClass(key) {
+                return {
+                    asc: this.sort_key === key && this.sort_asc,
+                    desc: this.sort_key === key && !this.sort_asc,
+                };
+            },
+        },
+        computed: {
+            sort_users() {
+                if (this.sort_key != "") {
+                    let set = 1;
+                    this.sort_asc ? (set = 1) : (set = -1);
+                    this.users.sort((a, b) => {
+                        if (a[this.sort_key] < b[this.sort_key]) return -1 * set;
+                        if (a[this.sort_key] > b[this.sort_key]) return 1 * set;
+                        return 0;
+                    });
+                    return this.users;
+                } else {
+                    return this.users;
+                }
+            },
+        },
+        mounted() {
+            axios.get('https://jsonplaceholder.typicode.com/users')
+                .then(response => this.users = response.data)
+        }
+    })
+</script>
+
+
+</html>
